@@ -1,6 +1,7 @@
-'use client'  // Add this at the top of your file
+"use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // Import useRouter for navigation
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,6 +22,8 @@ export function DiseaseForm() {
   const [nearbyVillages, setNearbyVillages] = useState<string[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
 
+  const router = useRouter(); // Initialize useRouter for navigation
+
   const diseaseOptions = [
     "Typhoid",
     "Dengue",
@@ -39,7 +42,6 @@ export function DiseaseForm() {
     { value: 'Abu Road', label: 'Abu Road' },
     { value: 'Achabal', label: 'Achabal' },
     { value: 'Achhnera', label: 'Achhnera' },
-    // Add more districts as needed
   ];
 
   const nearbyVillagesData: { [key: string]: string[] } = {
@@ -47,23 +49,7 @@ export function DiseaseForm() {
     "Abhayapuri": ["Bijni", "Goalpara"],
     "Aboi": ["Angphang", "Mon", "Wakching"],
     "Abu Road": ["Ambaji", "Mount Abu"],
-    "Achabal": [
-      "Bijbehara",
-      "Devsar",
-      "Dooru Verinag",
-      "Frisal",
-      "Kokernag",
-      "Kulgam",
-      "Mattan",
-      "Qazigund",
-      "Seer Hamdan",
-      "Yaripora",
-    ],
-    "Achhnera": ["Farah", "Fatehpur Sikri", "Kiraoli"],
-    "Achrol": ["Jamwa Ramgarh", "Manoharpur"],
-    "Adalaj": ["Shantigram"],
-    "Adampur": ["Bhogpur"],
-    "Addanki": [],
+    "Achabal": ["Bijbehara", "Devsar", "Dooru Verinag", "Frisal"],
   };
 
   useEffect(() => {
@@ -95,7 +81,6 @@ export function DiseaseForm() {
     const villages = nearbyVillagesData[district] || [];
     setNearbyVillages(villages);
 
-    // Check for the same disease in the same village
     const sameVillageEntries = updatedEntries.filter(
       (entry) => entry.diseaseName === diseaseName && entry.village === village
     );
@@ -103,18 +88,13 @@ export function DiseaseForm() {
     if (sameVillageEntries.length > 3) {
       const notification = {
         title: "Disease Spread Notification",
-        message: `The disease ${diseaseName} has spread in the village of ${district}. There are now more than 3 reported cases.`,
-        diseaseName: diseaseName,
-        village: village,
-        district: district,
+        message: `The disease ${diseaseName} has spread in ${district}. There are now more than 3 reported cases.`,
+        diseaseName,
+        village,
+        district,
       };
 
-      // Store the notification to be sent to the React Native app
       setNotifications((prevNotifications) => [...prevNotifications, notification]);
-
-      // You can also send this notification data to a backend or push service here
-      // For example, sending to Firebase Cloud Messaging (FCM) or other services
-      // sendNotificationToApp(notification);
     }
   };
 
@@ -125,7 +105,7 @@ export function DiseaseForm() {
   };
 
   const handleClearNearbyVillages = () => {
-    setNearbyVillages([]); // Clears the nearby villages state
+    setNearbyVillages([]);
   };
 
   return (
@@ -181,6 +161,15 @@ export function DiseaseForm() {
         Submit
       </Button>
 
+      {/* Navigate to Notifications Page */}
+      <Button
+        type="button"
+        onClick={() => router.push("/notifications")}
+        className="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition duration-200"
+      >
+        View Notification
+      </Button>
+
       <div className="mt-6">
         <h2 className="text-xl font-semibold text-gray-700">Disease Entries</h2>
         <ul className="list-disc pl-5 mt-3">
@@ -198,40 +187,6 @@ export function DiseaseForm() {
           ))}
         </ul>
       </div>
-
-      {nearbyVillages.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold text-gray-700">Nearby Villages</h2>
-          <ul className="list-disc pl-5 mt-3">
-            {nearbyVillages.map((village, index) => (
-              <li key={index} className="text-gray-800">
-                {village}
-              </li>
-            ))}
-          </ul>
-          <Button
-            variant="destructive"
-            onClick={handleClearNearbyVillages}
-            className="mt-4 w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition duration-200"
-          >
-            Clear Nearby Villages
-          </Button>
-        </div>
-      )}
-
-      {/* Display notifications */}
-      {notifications.length > 0 && (
-        <div className="mt-6">
-          <h2 className="text-xl font-semibold text-gray-700">Notifications</h2>
-          <ul className="list-disc pl-5 mt-3">
-            {notifications.map((notification, index) => (
-              <li key={index} className="text-gray-800">
-                <strong>{notification.title}</strong>: {notification.message}
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
     </form>
   );
 }
